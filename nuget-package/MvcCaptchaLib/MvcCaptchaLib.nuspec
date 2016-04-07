@@ -2,11 +2,11 @@
 <package >
   <metadata>
     <id>MvcCaptchaLib</id>
-    <version>1.3.1.3</version>
+    <version>1.3.2.0</version>
     <authors>Leonid Gordo</authors>
     <owners>Leonid Gordo</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>MVC compliant captcha generation library</description>
+    <description>MVC compliant captcha generation library;fixed some bugs. and modified layout.</description>
     <copyright>Copyright 2009 - 2012 Leonid Gordo</copyright>  
 	<licenseUrl>http://www.gnu.org/copyleft/lesser.html</licenseUrl>
 	<projectUrl>https://github.com/leon737/MvcCaptchaLib</projectUrl>

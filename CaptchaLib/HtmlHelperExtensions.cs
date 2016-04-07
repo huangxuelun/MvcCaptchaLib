@@ -13,6 +13,7 @@ if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 
 using System;
 using System.Linq.Expressions;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -22,6 +23,16 @@ namespace CaptchaLib
 {
     public static class HtmlHelperExtensions
     {
+        public static IHtmlString CaptchaFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TProperty>> expression, string actionName)
+        {
+            ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData);
+            return htmlHelper.CaptchaFor(expression, actionName, metadata.DisplayName);
+        }
+        public static IHtmlString CaptchaFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TProperty>> expression, string actionName, object htmlAttributes)
+        {
+            ModelMetadata metadata = ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData);
+            return htmlHelper.CaptchaFor(expression, actionName, null, null, metadata.DisplayName, htmlAttributes);
+        }
 
         public static IHtmlString Captcha(this HtmlHelper htmlHelper, string name, string actionName, string refreshLabel)
         {
@@ -45,12 +56,12 @@ namespace CaptchaLib
         {
             return Captcha(htmlHelper, name, null /* routeName */, actionName, controllerName, routeValues, refreshLabel, null);
         }
-        
+
         public static IHtmlString Captcha(this HtmlHelper htmlHelper, string name,
             string routeName, string actionName, string controllerName,
             object routeValues, string refreshLabel, object htmlAttributes)
         {
-            return CaptchaHelper(htmlHelper, name, routeName, actionName, controllerName, routeValues, refreshLabel, null);
+            return CaptchaHelper(htmlHelper, name, routeName, actionName, controllerName, routeValues, refreshLabel, htmlAttributes);
         }
 
         public static IHtmlString CaptchaFor<TModel, TProperty>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TProperty>> expression,
@@ -71,34 +82,24 @@ namespace CaptchaLib
             return CaptchaHelper(htmlHelper, ExpressionHelper.GetExpressionText(expression), null /* routeName */, actionName, controllerName, routeValues, refreshLabel, htmlAttributes);
         }
 
-        private static IHtmlString CaptchaHelper(this HtmlHelper htmlHelper, string name,
-           string routeName, string actionName, string controllerName,
-           object routeValues, string refreshLabel, object htmlAttributes)
+        private static IHtmlString CaptchaHelper(this HtmlHelper htmlHelper, string name, string routeName, string actionName, string controllerName, object routeValues, string refreshLabel, object htmlAttributes)
         {
-            var container = new TagBuilder("div");
-            container.MergeAttribute("class", "captchaContainer");
-
-            var image = new TagBuilder("img");
-            image.MergeAttribute("src", UrlHelper.GenerateUrl(routeName, actionName, controllerName, (RouteValueDictionary)routeValues, 
-                htmlHelper.RouteCollection, htmlHelper.ViewContext.RequestContext, true));
-            image.MergeAttribute("border", "0");
-
-            container.InnerHtml = image.ToString(TagRenderMode.SelfClosing);
-
-            var refresh = new TagBuilder("a");
-            refresh.MergeAttribute("href", "javascript:void(0)");
-            refresh.MergeAttribute("class", "newCaptcha");
-            refresh.SetInnerText(refreshLabel);
-
-            var br = new TagBuilder("br");
-
-            var textBox = htmlHelper.TextBox(name, "", htmlAttributes);
-
-            return new HtmlString(
-                container.ToString(TagRenderMode.Normal) + Environment.NewLine +
-                refresh.ToString(TagRenderMode.Normal) + Environment.NewLine +
-                br.ToString(TagRenderMode.SelfClosing) + Environment.NewLine +
-                textBox + Environment.NewLine);
+            TagBuilder tagBuilder1 = new TagBuilder("div");
+            tagBuilder1.MergeAttribute("class", "captchaContainer");
+            TagBuilder tagBuilder2 = new TagBuilder("img");
+            tagBuilder2.MergeAttribute("src", UrlHelper.GenerateUrl(routeName, actionName, controllerName, (RouteValueDictionary)routeValues, htmlHelper.RouteCollection, htmlHelper.ViewContext.RequestContext, true));
+            tagBuilder2.MergeAttribute("border", "0");
+            TagBuilder tagBuilder3 = new TagBuilder("a");
+            tagBuilder3.MergeAttribute("href", "javascript:void(0)");
+            tagBuilder3.MergeAttribute("class", "newCaptcha");
+            tagBuilder3.SetInnerText(refreshLabel);
+            MvcHtmlString mvcHtmlString = htmlHelper.TextBox(name, "", htmlAttributes);
+            var sb = new StringBuilder();
+            sb.Append(mvcHtmlString);
+            sb.Append(tagBuilder2.ToString(TagRenderMode.Normal));
+            sb.Append(tagBuilder3.ToString(TagRenderMode.Normal));
+            tagBuilder1.InnerHtml = sb.ToString();
+            return new HtmlString(tagBuilder1.ToString(TagRenderMode.Normal));
         }
     }
 }
